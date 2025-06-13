@@ -61,14 +61,54 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
-      .pipe(
-        tap(response => {
-          if (response.success && response.data) {
-            this.setAuthData(response.data.token, response.data.user);
-          }
-        })
-      );
+    // Mock authentication for demo purposes
+    return new Observable<LoginResponse>(observer => {
+      setTimeout(() => {
+        if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
+          const mockResponse: LoginResponse = {
+            success: true,
+            message: 'Login successful',
+            data: {
+              token: 'mock-jwt-token-' + Date.now(),
+              user: {
+                _id: 'mock-user-id',
+                name: 'Admin User',
+                email: credentials.email,
+                role: 'admin',
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            }
+          };
+          this.setAuthData(mockResponse.data.token, mockResponse.data.user);
+          observer.next(mockResponse);
+          observer.complete();
+        } else if (credentials.email === 'john@example.com' && credentials.password === 'seller123') {
+          const mockResponse: LoginResponse = {
+            success: true,
+            message: 'Login successful',
+            data: {
+              token: 'mock-jwt-token-' + Date.now(),
+              user: {
+                _id: 'mock-seller-id',
+                name: 'John Seller',
+                email: credentials.email,
+                role: 'seller',
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            }
+          };
+          this.setAuthData(mockResponse.data.token, mockResponse.data.user);
+          observer.next(mockResponse);
+          observer.complete();
+        } else {
+          observer.error({ message: 'Invalid credentials' });
+        }
+      }, 1000); // Simulate network delay
+    });
   }
 
   logout(): void {
